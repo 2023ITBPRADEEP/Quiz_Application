@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard - Quiz Application{% endblock %}
+
+{% block content %}
+<div class="leaderboard-container">
+    <h1>Leaderboard</h1>
+    
+    <div class="leaderboard-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>User</th>
+                    <th>Quiz</th>
+                    <th>Score</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for score in scores %}
+                <tr>
+                    <td class="rank">#{{ loop.index }}</td>
+                    <td class="username">{{ score.user.username }}</td>
+                    <td>{{ score.quiz.title }}</td>
+                    <td class="score">{{ score.score }}/{{ score.total_questions }}</td>
+                    <td class="date">{{ score.completed_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="no-scores">No scores yet. Be the first to take a quiz!</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="leaderboard-actions">
+        <a href="{{ url_for('quizzes') }}" class="btn btn-primary">Take a Quiz</a>
+    </div>
+</div>
+{% endblock %}

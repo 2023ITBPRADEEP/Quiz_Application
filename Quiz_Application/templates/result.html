@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Result - Quiz Application{% endblock %}
+
+{% block content %}
+<div class="result-container">
+    <h1>Quiz Completed!</h1>
+    
+    <div class="score-card">
+        <div class="score-circle">
+            <span class="score-value">{{ score.score }}</span>
+            <span class="score-total">/ {{ score.total_questions }}</span>
+        </div>
+        <p class="score-percentage">{{ ((score.score / score.total_questions) * 100)|int }}%</p>
+    </div>
+    
+    <div class="result-details">
+        <h2>{{ quiz.title }}</h2>
+        <p>Completed on: {{ score.completed_at.strftime('%Y-%m-%d %H:%M') }}</p>
+    </div>
+    
+    <div class="result-message">
+        {% if (score.score / score.total_questions) >= 0.8 %}
+            <p class="message success">Excellent! You did great!</p>
+        {% elif (score.score / score.total_questions) >= 0.6 %}
+            <p class="message good">Good job! Keep practicing!</p>
+        {% elif (score.score / score.total_questions) >= 0.4 %}
+            <p class="message average">Not bad, but there's room for improvement!</p>
+        {% else %}
+            <p class="message needs-improvement">Keep learning! You'll get better!</p>
+        {% endif %}
+    </div>
+    
+    <div class="result-actions">
+        <a href="{{ url_for('quizzes') }}" class="btn btn-primary">Take Another Quiz</a>
+        <a href="{{ url_for('leaderboard') }}" class="btn btn-secondary">View Leaderboard</a>
+    </div>
+</div>
+{% endblock %}

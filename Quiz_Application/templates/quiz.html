@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}{{ quiz.title }} - Quiz Application{% endblock %}
+
+{% block content %}
+<div class="quiz-container">
+    {% if existing_score %}
+    <div class="already-taken">
+        <h2>You've already taken this quiz!</h2>
+        <p>Your score: {{ existing_score.score }}/{{ existing_score.total_questions }}</p>
+        <a href="{{ url_for('result', score_id=existing_score.id) }}" class="btn btn-primary">View Result</a>
+        <a href="{{ url_for('quizzes') }}" class="btn btn-secondary">Back to Quizzes</a>
+    </div>
+    {% else %}
+    <div class="quiz-header">
+        <h1>{{ quiz.title }}</h1>
+        <div class="timer-container">
+            <span>Time Remaining: </span>
+            <span id="timer" class="timer">10:00</span>
+        </div>
+    </div>
+    
+    <div id="quiz-form">
+        <div class="question-container">
+            <div id="questions-wrapper">
+                <!-- Questions will be loaded here dynamically -->
+            </div>
+        </div>
+        
+        <button type="button" id="submit-quiz" class="btn btn-primary btn-large">Submit Quiz</button>
+    </div>
+    
+    <div id="loading" class="loading">
+        <p>Loading quiz...</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const quizId = {{ quiz.id }};
+    let timeRemaining = 600; // 10 minutes in seconds
+    let timerInterval;
+    
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                submitQuiz();
+            }
+        }, 1000);
+    }
+    
+    async function loadQuiz() {
+        try {
+            const response = await fetch(`/api/quiz/${quizId}`);
+            const quiz = await response.json();
+            
+            const wrapper = document.getElementById('questions-wrapper');
+            let html = '';
+            
+            quiz.questions.forEach((question, index) => {
+                html += `
+                    <div class="question-card" data-question-id="${question.id}">
+                        <h3>Question ${index + 1}</h3>
+                        <p class="question-text">${question.text}</p>
+                        <div class="choices">
+                            ${question.choices.map(choice => `
+                                <label class="choice-label">
+                                    <input type="radio" name="question_${question.id}" value="${choice.id}">
+                                    <span class="choice-text">${choice.text}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            wrapper.innerHTML = html;
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('quiz-form').style.display = 'block';
+            startTimer();
+        } catch (error) {
+            console.error('Error loading quiz:', error);
+            document.getElementById('loading').innerHTML = '<p class="error">Error loading quiz. Please try again.</p>';
+        }
+    }
+    
+    async function submitQuiz() {
+        clearInterval(timerInterval);
+        
+        const answers = {};
+        const questions = document.querySelectorAll('.question-card');
+        
+        questions.forEach(question => {
+            const questionId = question.dataset.questionId;
+            const selected = question.querySelector(`input[type="radio"]:checked`);
+            if (selected) {
+                answers[questionId] = parseInt(selected.value);
+            }
+        });
+        
+        try {
+            const response = await fetch('/api/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    quiz_id: quizId,
+                    answers: answers
+                })
+            });
+            
+            const result = await response.json();
+            window.location.href = `/result/${result.score_id}`;
+        } catch (error) {
+            console.error('Error submitting quiz:', error);
+            alert('Error submitting quiz. Please try again.');
+        }
+    }
+    
+    document.getElementById('submit-quiz')?.addEventListener('click', submitQuiz);
+    
+    // Load quiz on page load
+    {% if not existing_score %}
+    loadQuiz();
+    {% endif %}
+</script>
+{% endblock %}

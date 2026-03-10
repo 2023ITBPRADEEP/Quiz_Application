@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Quiz Application{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    {% if login_mode %}
+    {# Student Login Form #}
+    <div class="auth-box">
+        <h2>Student Login</h2>
+        <form method="POST" action="{{ url_for('student_login') }}">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+        <p class="auth-link"><a href="{{ url_for('login') }}">Back to role selection</a></p>
+    </div>
+    {% else %}
+    {# Role Selection Page #}
+    <div class="auth-box choice-box">
+        <h2>Who are you?</h2>
+        <p class="choice-description">Select your role to continue</p>
+        
+        <div class="choice-buttons">
+            <a href="{{ url_for('admin_login') }}" class="btn btn-primary btn-choice btn-admin-choice">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <path d="M12 8v4"/>
+                    <path d="M12 16h.01"/>
+                </svg>
+                Admin
+            </a>
+            
+            <a href="{{ url_for('student_login') }}" class="btn btn-secondary btn-choice btn-student-choice">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                Student
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+    .choice-box {
+        max-width: 450px;
+        text-align: center;
+    }
+    
+    .choice-description {
+        color: var(--secondary-color);
+        margin-bottom: 2rem;
+        font-size: 1.1rem;
+    }
+    
+    .choice-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .btn-choice {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 1.25rem 2rem;
+        font-size: 1.2rem;
+        text-decoration: none;
+    }
+    
+    .btn-admin-choice {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-admin-choice:hover {
+        background: linear-gradient(135deg, #5568d3 0%, #6838a2 100%);
+        color: white;
+    }
+    
+    .btn-student-choice {
+        background: linear-gradient(135deg, #4a90d9 0%, #6fc3df 100%);
+        color: white;
+    }
+    
+    .btn-student-choice:hover {
+        background: linear-gradient(135deg, #357abd 0%, #5ab3cf 100%);
+        color: white;
+    }
+</style>
+{% endblock %}
